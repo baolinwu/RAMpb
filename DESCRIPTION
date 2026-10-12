@@ -1,0 +1,15 @@
+Package: RAMpb
+Title: Statistical Test and Sample Size/Power Calculation for Equivalency Assessment Using Absolute Deviation 
+  from Repeated Measures (as commonly applied in medical comparison studies)
+Version: 0.0.1
+Imports: nloptr
+Description: This package implements methods for various statistical tests with sample size/power calculation in a random-effects ANOVA model,
+   with application to medical comparison problem (e.g. equivalency test of pulse oximetry  systems).
+Depends: 
+    R (>= 4.0.0)
+License: GPL (>= 2)
+LazyData: true
+Encoding: UTF-8
+Author: Baolin Wu [aut, cre]; Yun Bai [aut, cre]
+Maintainer: Baolin Wu <baolin.wu@uci.edu>
+Config/roxygen2/version: 8.1.1

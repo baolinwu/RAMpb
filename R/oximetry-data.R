@@ -1,0 +1,26 @@
+#' Oximetry comparison data for 20 subjects
+#'
+#' A representative data from a single-center, non-randomized, prospective study conducted by
+#' a medical device company to demonstrate equivalency in performance between a FDA-cleared oximetry system and an investigational system.
+#' A cohort of healthy, non-smoking (or having refrained from smoking for 2 days) adults
+#' and adolescent volunteers, ages 18 to 50 years olds, have been recruited.
+#' Multiple measures of paired difference of tissue oxygen saturation levels have been obtained for each subject.
+#' Due to the proprietary nature of the data, we simulated a representative data with 20 subjects
+#' to mimic the original data set based on estimated model from the original data.
+#'
+#' @format A dataframe with two components
+#' \describe{
+#'   \item{Y}{ differences of repeatedly measured oxygen levels between a FDA-clearted oximetry and an investigational oximetry system.  }
+#'   \item{A}{ individual ids (coded as 1 to 20) }
+#' }
+#'
+#' @references
+#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+## ' @source \url{http://www.github.com/baolinwu/SPprm}
+#' @examples
+#' data(poData)
+#' summary(poData$Y); table(poData$A)
+#' PBrms(poData$Y,poData$A)
+"poData"
+
+
