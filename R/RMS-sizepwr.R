@@ -65,7 +65,7 @@ RMStest <- function(X, rho, REML=TRUE){
   ## est
   fn = function(xpar) llkfun(xpar, X, REML)
   hin = function(xpar) Cfun(xpar, rho)
-  aaa = nloptr::cobyla(c(log(5),log(5),1), fn, hin=hin)
+  aaa = nloptr::cobyla(c(log(5),log(5),1), fn, hin=hin, deprecatedBehavior = FALSE)
   xpar = aaa$par
   e2w = exp(xpar[1]);  e2b = exp(xpar[2]);  eu0 = xpar[3]
   ## test
@@ -127,7 +127,7 @@ RMSap <- function(alpha=0.05, n, m,s2w, s2b, mu, rho, REML=TRUE){
   }
   ## est
   hin = function(xpar) Cfun(xpar, rho)
-  aaa = nloptr::cobyla(c(log(5),log(5),1), fn, hin=hin)
+  aaa = nloptr::cobyla(c(log(5),log(5),1), fn, hin=hin, deprecatedBehavior = FALSE)
   xpar = aaa$par
   e2w = exp(xpar[1]);  e2b = exp(xpar[2]);  eu0 = xpar[3]
   ##  
