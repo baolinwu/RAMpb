@@ -13,7 +13,7 @@
 # ' @references
 # ' Wu,B., Guan,W., Pankow,J.S. (2016) On efficient and accurate calculation of significance p-values for sequence kernel association test of variant set. \emph{Annals of human genetics}, 80(2), 123-135.
 # '
-# ' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+# ' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report.
 pchisum <- function(Q.all, lambda, h = rep(1, length(lambda)), delta = rep(0, length(lambda)), acc=1e-2,lim=1e7){
   pval = pnchisum(Q.all,lambda,h,delta)
   i1 = which(is.finite(Q.all))

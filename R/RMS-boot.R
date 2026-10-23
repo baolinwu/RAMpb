@@ -18,7 +18,7 @@
 #' }
 #' @export
 #' @references
-#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies. bioRxiv:516658
+#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report.
 #' @examples
 #' s2w=1.4^2; s2b=1.7^2; mu0=-0.4
 #' ng = c(10,2,10,10,5,7,9,10)
@@ -29,20 +29,19 @@ PBrms <- function(Y, subj, rho0=3, REML=TRUE){
   ng = as.vector( table(subj) ); N = sum(ng); K = length(ng)
   mus = tapply(Y, subj, mean)
   sse = sum( tapply(Y, subj, function(yi) sum((yi-mean(yi))^2) ) )
-  rho = rho0^2
   ## est
   lfn = function(xpar){
-    mu = xpar[1]; s2b = exp(xpar[2]); s2w = exp(xpar[3])
-    ll1 = sum( log(s2w+ng*s2b) ) + (N-K)*xpar[3] + sse/s2w + sum( ng/(s2w+ng*s2b)*(mus-mu)^2 )
+    r0 = xpar[1]; a1 = exp(xpar[2]); a2 = exp(xpar[3])
+    b1 = 4*a1/(a1+1)^2; b2 = 1/(1+a2)
+    mu = r0*(a1-1)/(a1+1); s2w = r0^2*b1*b2; s2b = r0^2*b1*(1-b2)
+    ll1 = sum( log(s2w+ng*s2b) ) + (N-K)*log(s2w) + sse/s2w + sum( ng/(s2w+ng*s2b)*(mus-mu)^2 )
     ans = ll1 + REML*log( sum(ng/(s2w+ng*s2b)) )
+    return(ans)
   }
-  cfn = function(xpar){
-    mu = xpar[1]; s2b = exp(xpar[2]); s2w = exp(xpar[3])
-    -(mu^2+s2b+s2w - rho)
-  }
-  ## options('nloptr.show.inequality.warning'=FALSE)
-  xpar = nloptr::cobyla(c(mean(Y),log(rho/2),log(rho/2)), lfn, hin=cfn, control=list(maxeval=1e4),deprecatedBehavior = FALSE)$par
-  mu = xpar[1];  s2b = exp(xpar[2]);  s2w = exp(xpar[3])
+  xpar = optim(c(rho0+0.001,0,0), fn=lfn, method="L-BFGS-B", lower=c(rho0,-20,-20), upper=c(20,20,20) )$par
+  r0 = xpar[1]; a1 = exp(xpar[2]); a2 = exp(xpar[3])
+  b1 = 4*a1/(a1+1)^2; b2 = 1/(1+a2)
+  mu = r0*(a1-1)/(a1+1); s2w = r0^2*b1*b2; s2b = r0^2*b1*(1-b2)
   ## RMS test
   lam = h = dta = NULL
   for(i in 1:K){
@@ -51,8 +50,7 @@ PBrms <- function(Y, subj, rho0=3, REML=TRUE){
     dta = c(dta,eta0, 0)
   }
   Qy = sum(Y^2)
-  pvalt = 1-pchisum(Qy,lam,h,dta)
-  ##
+  pvalt = 1 - pchisum(Qy,lam,h,dta)
   return( list(p.value=pvalt, pars=c(s2w=s2w,s2b=s2b,mu=mu)) )
 }
 
@@ -86,7 +84,7 @@ PBrms <- function(Y, subj, rho0=3, REML=TRUE){
 #'
 #' Pennello, G. A. (2003) Comparing monitoring devices when a gold standard in unavailable: Application to pulse oximeters. ASA Proceedings of the Joint Statistical Meetings pages 3256–3263.
 #' 
-#' Bai,Y., Wang,Z., Lystig,T., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies. bioRxiv:516658
+#' Bai,Y., Wang,Z., Lystig,T., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 #' @examples
 #' s2w=1.4^2; s2b=1.7^2; mu0=-0.4
 #' ng = c(10,2,10,10,5,7,9,10)
@@ -101,19 +99,20 @@ Zrms <- function(Y,subj, rho0=3, REML=TRUE){
   Qy = sum(Y^2) ## sse + sum(ng*mus^2)
   ## score Z
   lfn = function(xpar){
-    mu = xpar[1]; s2b = exp(xpar[2]); s2w = exp(xpar[3])
-    ll1 = sum( log(s2w+ng*s2b) ) + (N-K)*xpar[3] + sse/s2w + sum( ng/(s2w+ng*s2b)*(mus-mu)^2 )
-    ll1 + REML*log( sum(ng/(s2w+ng*s2b)) )
+    r0 = xpar[1]; a1 = exp(xpar[2]); a2 = exp(xpar[3])
+    b1 = 4*a1/(a1+1)^2; b2 = 1/(1+a2)
+    mu = r0*(a1-1)/(a1+1); s2w = r0^2*b1*b2; s2b = r0^2*b1*(1-b2)
+    ll1 = sum( log(s2w+ng*s2b) ) + (N-K)*log(s2w) + sse/s2w + sum( ng/(s2w+ng*s2b)*(mus-mu)^2 )
+    ans = ll1 + REML*log( sum(ng/(s2w+ng*s2b)) )
+    return(ans)
   }
-  cfn = function(xpar){
-    mu = xpar[1]; s2b = exp(xpar[2]); s2w = exp(xpar[3])
-    -(mu^2+s2b+s2w - rho2)
-  }
-  ##options('nloptr.show.inequality.warning'=FALSE)
-  xpar = nloptr::cobyla(c(mean(Y),log(rho2/2),log(rho2/2)), lfn, hin=cfn, control=list(maxeval=1e4),deprecatedBehavior = FALSE)$par
-  mu = xpar[1];  s2b = exp(xpar[2]);  s2w = exp(xpar[3])
+  ## xpar = optim(c(rho0+0.001,0,0), fn=lfn, method="L-BFGS-B", lower=c(rho0,-Inf,-Inf) )$par
+  xpar = optim(c(rho0+0.001,0,0), fn=lfn, method="L-BFGS-B", lower=c(rho0,-20,-20), upper=c(20,20,20) )$par
+  r0 = xpar[1]; a1 = exp(xpar[2]); a2 = exp(xpar[3])
+  b1 = 4*a1/(a1+1)^2; b2 = 1/(1+a2)
+  mu = r0*(a1-1)/(a1+1); s2w = r0^2*b1*b2; s2b = r0^2*b1*(1-b2)
   tau2 = ( 2*(s2w+ng*s2b)^2+2*(ng-1)*s2w^2 + 4*ng*(s2w+ng*s2b)*mu^2 )/ng^2
-  V0 = sum(tau2*ng^2/N^2)
+  V0 = sum(tau2*ng^2/N^2)  
   Zs = (Qy/N-rho2)/sqrt(V0)
   pvals = pnorm(Zs)
   ## Wald Z
@@ -124,7 +123,7 @@ Zrms <- function(Y,subj, rho0=3, REML=TRUE){
     ll1 = sum( log(s2w+ng*s2b) ) + (N-K)*xpar[2] + sse/s2w + sum( ng/(s2w+ng*s2b)*(mus-mu)^2 )
     ll1 + REML*log(aas)
   }
-  xpar = nloptr::newuoa(c(0,0), lfn, control=list(maxeval=1e4))$par
+  xpar = optim(c(0,0), lfn, method='BFGS')$par
   s2b1 = exp(xpar[1]); s2w1 = exp(xpar[2])
   aa1 = ng/(s2w1+ng*s2b1); mu1 = sum(aa1*mus)/sum(aa1)
   tau2 = ( 2*(s2w1+ng*s2b1)^2+2*(ng-1)*s2w1^2 + 4*ng*(s2w1+ng*s2b1)*mu1^2 )/ng^2
@@ -137,4 +136,3 @@ Zrms <- function(Y,subj, rho0=3, REML=TRUE){
   return( list(p.value=pval, pars0=c(s2w=s2w,s2b=s2b,mu=mu,R=Qy/N,V=V0),
                pars=c(s2w=s2w1,s2b=s2b1,mu=mu1,R=Qy/N,V=V1)) )
 }
-

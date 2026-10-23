@@ -42,5 +42,5 @@ Pennello, G. A. (2002) Sample size for paired repeated measures designs of metho
 
 Pennello, G. A. (2003) Comparing monitoring devices when a gold standard in unavailable: Application to pulse oximeters. ASA Proceedings of the Joint Statistical Meetings pages 3256–3263.
 
-Bai,Y., Wang,Z., Lystig,T., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies. bioRxiv:516658
+Bai,Y., Wang,Z., Lystig,T., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 }

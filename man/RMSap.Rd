@@ -36,5 +36,5 @@ Due to its nature of composite null hypothesis, it is not trivial to derive the 
 based approach to quickly compute the power.
 }
 \references{
-Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 }

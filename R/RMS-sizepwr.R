@@ -1,4 +1,4 @@
-## Internal function to compute the log likelihood for paired data Dij
+## (OLD) Internal function to compute the log likelihood for paired data Dij
 ## @param xpar vector of log(s2w), log(s2b), mu0
 ## @param Dij  n by m matrix of paired measures
 ## @param rho  null value of sqrt(s2w+s2b+mu0^2)
@@ -17,7 +17,7 @@ llkfun <- function(xpar, Dij, REML=TRUE){
    if(REML) allk = -log(s2s)
    n*llk0+llk1+allk
 }
-## Internal constraint function
+## (OLD) Internal constraint function
 ## @param xpar vector of log(s2w), log(s2b), mu0
 ## @param rho  null value of sqrt(s2w+s2b+mu0^2)
 Cfun <- function(xpar, rho=3){
@@ -26,6 +26,7 @@ Cfun <- function(xpar, rho=3){
    mu0 = xpar[3]
    s2w+s2b+mu0^2-rho^2
 }
+
 ## Internal P-value calc func.
 Tpval0 <- function(xq, n, m, s2w, s2b, mu0){
   lam = c(s2w+m*s2b, s2w);   h = c(n,n*(m-1))
@@ -52,7 +53,7 @@ Tpval0 <- function(xq, n, m, s2w, s2b, mu0){
 #' }
 #' @export
 #' @references
-#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 #' @examples
 #' n=20; m=20; s2w=4.44; s2b=1.2; mu0=0.94
 #' e = matrix(rnorm(n*m), n,m)*sqrt(s2w)
@@ -62,31 +63,12 @@ Tpval0 <- function(xq, n, m, s2w, s2b, mu0){
 #' RMStest(X, sqrt(s2w+s2b+mu0^2))
 RMStest <- function(X, rho, REML=TRUE){
   n = dim(X)[1]; m = dim(X)[2]
-  ## est
-  fn = function(xpar) llkfun(xpar, X, REML)
-  hin = function(xpar) -Cfun(xpar, rho)
-  aaa = nloptr::cobyla(c(log(5),log(5),1), fn, hin=hin, deprecatedBehavior = FALSE)
-  xpar = aaa$par
-  e2w = exp(xpar[1]);  e2b = exp(xpar[2]);  eu0 = xpar[3]
-  ## test
-  pval = rep(NA,3)
-  xq = sum(X^2)
-  pval[1] = Tpval0(xq, n,m,e2w,e2b,eu0)
-  ## score Z
-  Zn = xq/n/m - rho^2
-  V0 = (2*(e2w+m*e2b)^2+2*(m-1)*e2w^2+4*m*(e2w+m*e2b)*eu0^2)/n/m^2
-  Z = Zn/sqrt(V0)
-  pval[2] = 2*pnorm(-abs(Z))
-  ## Wald Z
-  zpar = nloptr::newuoa(xpar, fn)$par
-  z2w = exp(zpar[1])
-  z2b = exp(zpar[2])
-  zu0 = zpar[3]
-  V = (2*(z2w+m*z2b)^2+2*(m-1)*z2w^2+4*m*(z2w+m*z2b)*zu0^2)/n/m^2
-  Z = Zn/sqrt(V)
-  pval[3] = 2*pnorm(-abs(Z))
+  Y = as.vector(X); subj = rep(1:n, m)
+  aaa = PBrms(Y, subj, rho, REML)
+  bbb = Zrms(Y,subj, rho, REML)
+  pval = c(aaa$p.val, bbb$p.val)
   names(pval) = c('QMS', 'Z-score', 'Z-Wald')
-  return(list(p.value=pval, pars=c(s2w=e2w,s2b=e2b,mu=eu0)) )
+  return(list(p.value=pval, pars=aaa$pars) )
 }
 
 #' Analytical power calculation for RMS test problem
@@ -111,25 +93,25 @@ RMStest <- function(X, rho, REML=TRUE){
 #' }
 #' @export
 #' @references
-#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 RMSap <- function(alpha=0.05, n, m,s2w, s2b, mu, rho, REML=TRUE){
   ## est
-  fn = function(xpar){
-    e2w = exp(xpar[1])
-    e2b = exp(xpar[2])
-    eu0 = xpar[3]
+  lfn = function(xpar){
+    r0 = xpar[1]; a1 = exp(xpar[2]); a2 = exp(xpar[3])
+    b1 = 4*a1/(a1+1)^2; b2 = 1/(1+a2)
+    eu0 = r0*(a1-1)/(a1+1); e2w = r0^2*b1*b2; e2b = r0^2*b1*(1-b2)
     e2s = m*e2b+e2w
-    llk0 = log(e2s) + (m-1)*xpar[1]
+    llk0 = log(e2s) + (m-1)*log(e2w)
     llk1 = (m-1)*s2w/e2w + (m*(eu0-mu)^2 + m*s2b+s2w)/e2s
     allk = 0
     if(REML) allk = -log(e2s)/n
     llk0+llk1+allk
   }
   ## est
-  hin = function(xpar) -Cfun(xpar, rho)
-  aaa = nloptr::cobyla(c(log(5),log(5),1), fn, hin=hin, deprecatedBehavior = FALSE)
-  xpar = aaa$par
-  e2w = exp(xpar[1]);  e2b = exp(xpar[2]);  eu0 = xpar[3]
+  xpar = optim(c(rho+0.001,0,0), fn=lfn, method="L-BFGS-B", lower=c(rho,-20,-20), upper=c(20,20,20) )$par
+  r0 = xpar[1]; a1 = exp(xpar[2]); a2 = exp(xpar[3])
+  b1 = 4*a1/(a1+1)^2; b2 = 1/(1+a2)
+  eu0 = r0*(a1-1)/(a1+1); e2w = r0^2*b1*b2; e2b = r0^2*b1*(1-b2)
   ##  
   A0 = round(1/alpha)
   f0 = function(x) ( Tpval0(x, n,m,e2w,e2b,eu0)/alpha - 1 )*A0
@@ -161,7 +143,7 @@ RMSap <- function(alpha=0.05, n, m,s2w, s2b, mu, rho, REML=TRUE){
 #' }
 #' @export
 #' @references
-#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 RMSmcp <- function(alpha=0.05,n, m, s2w, s2b, mu, rho, REML=TRUE, B=1e3){
   pval = rep(1, B)
   for(it in 1:B){
@@ -195,7 +177,7 @@ RMSmcp <- function(alpha=0.05,n, m, s2w, s2b, mu, rho, REML=TRUE, B=1e3){
 #' }
 #' @export
 #' @references
-#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+#' Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 RMSas <- function(pwr=0.8,alpha=0.05, m,s2w, s2b, mu, rho, REML=TRUE){
   ## est
   fn = function(n) RMSap(alpha, round(n), m,s2w, s2b, mu, rho, REML)$pwr - pwr

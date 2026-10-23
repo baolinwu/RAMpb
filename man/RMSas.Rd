@@ -34,5 +34,5 @@ Due to discrete nature of sample size, the power is not a continuous function. T
 to compute an approximate sample size n under a given m (number of measures per unit), which has power closest to the desired power.
 }
 \references{
-Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies.
+Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report
 }

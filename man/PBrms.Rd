@@ -37,5 +37,5 @@ Y = mu0 + (rnorm(8)*sqrt(s2b))[A] + rnorm(sum(ng))*sqrt(s2w)
 PBrms(Y,A)
 }
 \references{
-Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical methods for equivalency test with sample size and power calculation for medical device comparison studies. bioRxiv:516658
+Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. tech report.
 }
