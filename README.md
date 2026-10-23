@@ -2,7 +2,7 @@
  - An R package for Statistical Test and Sample Size/Power Calculation for Equivalency Assessment Using Absolute Deviation 
   from Repeated Measures (as commonly applied in medical comparison studies)
  - Reference
-    - Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) Statistical test with sample size and power calculation for paired repeated measures designs of method comparison studies. *tech rep*.
+    - Bai,Y., Wang,Z., Lystig,T.C., and Wu,B. (2026) An Analytical Approach to Sample Size and Power Calculation for Equivalence Testing in Medical Device Comparison Studies. *tech rep*.
  - Sample R codes
 ```R
  ## install the package
